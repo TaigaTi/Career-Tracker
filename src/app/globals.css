@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: add `dark` to <html> to enable. */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * JobWize design language
+ * -----------------------
+ * Warm, encouraging, focused — a career journal you actually want to open.
+ * Brand: confident violet. Accent: amber "win" highlight.
+ * Surfaces are layered (app bg < card) with soft borders and gentle radii.
+ */
+:root {
+  --background: oklch(0.985 0.005 95);
+  --surface: oklch(1 0 0);
+  --surface-muted: oklch(0.97 0.008 95);
+  --foreground: oklch(0.22 0.02 285);
+  --muted-foreground: oklch(0.52 0.02 285);
+  --border: oklch(0.91 0.01 285);
+  --input: oklch(0.91 0.01 285);
+  --ring: oklch(0.62 0.19 290);
+
+  --brand: oklch(0.58 0.21 290);
+  --brand-foreground: oklch(0.99 0.01 290);
+  --brand-soft: oklch(0.95 0.04 290);
+
+  --accent: oklch(0.78 0.15 75);
+  --accent-foreground: oklch(0.3 0.06 70);
+
+  --success: oklch(0.7 0.16 150);
+  --danger: oklch(0.62 0.21 25);
+
+  --radius: 0.85rem;
+}
+
+.dark {
+  --background: oklch(0.18 0.015 285);
+  --surface: oklch(0.22 0.018 285);
+  --surface-muted: oklch(0.26 0.02 285);
+  --foreground: oklch(0.95 0.01 285);
+  --muted-foreground: oklch(0.68 0.02 285);
+  --border: oklch(0.32 0.02 285);
+  --input: oklch(0.34 0.02 285);
+  --ring: oklch(0.7 0.16 290);
+
+  --brand: oklch(0.7 0.17 290);
+  --brand-foreground: oklch(0.16 0.02 285);
+  --brand-soft: oklch(0.3 0.06 290);
+
+  --accent: oklch(0.78 0.14 75);
+  --accent-foreground: oklch(0.22 0.04 70);
+
+  --success: oklch(0.72 0.15 150);
+  --danger: oklch(0.68 0.2 25);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-soft: var(--brand-soft);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-sm: calc(var(--radius) - 0.45rem);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Respect users who installed the PWA: avoid text selection on chrome. */
+  ::selection {
+    background-color: var(--color-brand-soft);
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: radial-gradient(
+      var(--color-border) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+  }
+}
