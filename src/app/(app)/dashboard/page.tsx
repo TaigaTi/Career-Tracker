@@ -6,6 +6,7 @@ import { getEntries, getEntryStats } from "@/lib/entries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge, ImpactBadge } from "@/components/entry-meta";
+import { SeedDemoButton } from "@/components/seed-demo-button";
 
 export const metadata = { title: "Dashboard" };
 
@@ -119,6 +120,10 @@ export default async function DashboardPage() {
                   Log your first win
                 </Link>
               </Button>
+              <p className="text-xs text-muted-foreground">
+                Just exploring? Add sample data.
+              </p>
+              <SeedDemoButton variant="outline" />
             </CardContent>
           </Card>
         ) : (

@@ -1,4 +1,5 @@
 import { getEntries, getAllTags, type EntryFilters } from "@/lib/entries";
+import { isAiConfigured } from "@/lib/ai-synthesis";
 import { SynthesisView } from "@/components/synthesis/synthesis-view";
 import { EmptyState } from "@/components/synthesis/empty-state";
 
@@ -45,6 +46,7 @@ export default async function SynthesisPage({
     <SynthesisView
       entries={entries}
       tags={tags}
+      aiEnabled={isAiConfigured()}
       filters={{
         from: params.from,
         to: params.to,

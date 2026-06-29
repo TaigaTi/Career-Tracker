@@ -10,6 +10,8 @@ import {
   Download,
   Sparkles,
   Trophy,
+  Loader2,
+  RotateCcw,
 } from "lucide-react";
 import { type Entry, CATEGORIES, CATEGORY_LABELS } from "@/lib/types";
 import {
@@ -19,6 +21,8 @@ import {
   toReviewSummary,
   toMarkdown,
 } from "@/lib/synthesis";
+import { enhanceWithAi, type AiSynthesisResult } from "@/lib/ai-synthesis-actions";
+import type { AiResult } from "@/lib/ai-synthesis";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +50,8 @@ const PRESETS: { key: Preset; label: string }[] = [
 export interface SynthesisViewProps {
   entries: Entry[];
   tags: string[];
+  /** Whether Claude-powered synthesis is available on this deployment. */
+  aiEnabled?: boolean;
   /** Echoed back from the URL so the controls reflect the active filters. */
   filters: {
     from?: string;
@@ -66,12 +72,27 @@ function buildQuery(params: Record<string, string | undefined>): string {
   return s ? `?${s}` : "";
 }
 
-export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
+export function SynthesisView({
+  entries,
+  tags,
+  aiEnabled = false,
+  filters,
+}: SynthesisViewProps) {
   const router = useRouter();
   const pathname = usePathname();
 
   const [activeFormat, setActiveFormat] = React.useState<FormatKey>("promotion");
   const [copied, setCopied] = React.useState(false);
+
+  // Claude-enhanced output, keyed to the format it was generated for.
+  const [ai, setAi] = React.useState<AiResult | null>(null);
+  const [aiError, setAiError] = React.useState<string | null>(null);
+  const [isEnhancing, startEnhance] = React.useTransition();
+
+  const resetAi = React.useCallback(() => {
+    setAi(null);
+    setAiError(null);
+  }, []);
 
   const activePreset: Preset = (PRESETS.some((p) => p.key === filters.preset)
     ? filters.preset
@@ -81,10 +102,11 @@ export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
 
   const navigate = React.useCallback(
     (next: Partial<SynthesisViewProps["filters"]>) => {
+      resetAi();
       const merged = { ...filters, ...next };
       router.push(`${pathname}${buildQuery(merged)}`);
     },
-    [filters, pathname, router],
+    [filters, pathname, router, resetAi],
   );
 
   function onPresetChange(preset: Preset) {
@@ -124,7 +146,7 @@ export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
     return found?.label;
   }, [activePreset]);
 
-  // Generated content for the active format.
+  // Template-generated content for the active format.
   const generated = React.useMemo(() => {
     if (activeFormat === "promotion") {
       const bullets = toPromotionBullets(entries);
@@ -143,8 +165,27 @@ export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
       };
     }
     const markdown = toReviewSummary(entries, { periodLabel });
-    return { bullets: null, markdown };
+    return { bullets: null as string[] | null, markdown };
   }, [activeFormat, entries, periodLabel]);
+
+  // If Claude output exists for the active format, prefer it.
+  const aiForActive = ai && ai.format === activeFormat ? ai : null;
+
+  const display = React.useMemo(() => {
+    if (aiForActive) {
+      if (activeFormat === "review") {
+        const markdown = aiForActive.markdown ?? "";
+        return { bullets: null as string[] | null, markdown };
+      }
+      const bullets = aiForActive.items ?? [];
+      const heading =
+        activeFormat === "promotion"
+          ? "Promotion Case Highlights"
+          : "Resume Highlights";
+      return { bullets, markdown: toMarkdown([{ heading, lines: bullets }]) };
+    }
+    return generated;
+  }, [aiForActive, activeFormat, generated]);
 
   const grouped = React.useMemo(() => groupBy(entries, "category"), [entries]);
 
@@ -157,9 +198,27 @@ export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
     return "all time";
   }, [filters.from, filters.to]);
 
+  function onEnhance() {
+    setAiError(null);
+    startEnhance(async () => {
+      const res: AiSynthesisResult = await enhanceWithAi(activeFormat, {
+        from: filters.from,
+        to: filters.to,
+        tag: filters.tag,
+        category: filters.category,
+      });
+      if (res.ok && res.result) {
+        setAi(res.result);
+        setCopied(false);
+      } else {
+        setAiError(res.error ?? "Something went wrong.");
+      }
+    });
+  }
+
   async function onCopy() {
     try {
-      await navigator.clipboard.writeText(generated.markdown);
+      await navigator.clipboard.writeText(display.markdown);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -168,7 +227,7 @@ export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
   }
 
   function onDownload() {
-    const blob = new Blob([generated.markdown], {
+    const blob = new Blob([display.markdown], {
       type: "text/markdown;charset=utf-8",
     });
     const url = URL.createObjectURL(blob);
@@ -349,11 +408,42 @@ export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
       {/* Generated output + actions */}
       <Card>
         <CardContent className="space-y-4 p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
               {count} {count === 1 ? "win" : "wins"} included
+              {aiForActive && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand">
+                  <Sparkles className="h-3 w-3" />
+                  AI-enhanced
+                </span>
+              )}
             </p>
-            <div className="flex shrink-0 gap-2">
+            <div className="flex shrink-0 flex-wrap gap-2">
+              {aiEnabled && (
+                <Button
+                  variant={aiForActive ? "ghost" : "primary"}
+                  size="sm"
+                  onClick={onEnhance}
+                  disabled={isEnhancing || count === 0}
+                >
+                  {isEnhancing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Writing…
+                    </>
+                  ) : aiForActive ? (
+                    <>
+                      <RotateCcw className="h-4 w-4" />
+                      Regenerate
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Enhance with AI
+                    </>
+                  )}
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={onCopy}>
                 {copied ? (
                   <>
@@ -374,13 +464,22 @@ export function SynthesisView({ entries, tags, filters }: SynthesisViewProps) {
             </div>
           </div>
 
+          {aiError && (
+            <p
+              role="alert"
+              className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger"
+            >
+              {aiError}
+            </p>
+          )}
+
           {activeFormat === "review" ? (
             <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-surface-muted p-4 font-sans text-sm leading-relaxed text-foreground">
-              {generated.markdown}
+              {display.markdown}
             </pre>
           ) : (
             <ul className="space-y-2.5">
-              {generated.bullets?.map((bullet, i) => (
+              {display.bullets?.map((bullet, i) => (
                 <li
                   key={i}
                   className="flex gap-2.5 text-sm leading-relaxed text-foreground"
