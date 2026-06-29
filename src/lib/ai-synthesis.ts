@@ -1,11 +1,12 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
 import { CATEGORY_LABELS, IMPACT_LABELS, type Entry } from "@/lib/types";
 
-// Default to the latest, most capable Claude model. Override with ANTHROPIC_MODEL.
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-4-8";
+// Provider models — override via env. Defaults are the latest fast tiers.
+const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-4-8";
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
 export type AiFormat = "promotion" | "resume" | "review";
+export type AiProvider = "gemini" | "claude";
 
 export interface AiResult {
   format: AiFormat;
@@ -15,9 +16,19 @@ export interface AiResult {
   markdown?: string;
 }
 
-/** Whether Claude-powered synthesis is available in this deployment. */
+/**
+ * Which AI provider is active. Gemini (Google AI Studio) takes priority when
+ * its key is set, then Claude (Anthropic), else none (template fallback).
+ */
+export function activeProvider(): AiProvider | null {
+  if (process.env.GEMINI_API_KEY) return "gemini";
+  if (process.env.ANTHROPIC_API_KEY) return "claude";
+  return null;
+}
+
+/** Whether AI-powered synthesis is available in this deployment. */
 export function isAiConfigured(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
+  return activeProvider() !== null;
 }
 
 const SYSTEM_PROMPTS: Record<AiFormat, string> = {
@@ -56,7 +67,36 @@ function serializeEntries(entries: Entry[]): string {
     .join("\n\n");
 }
 
-function schemaFor(format: AiFormat) {
+function buildUserContent(entries: Entry[]): string {
+  return `Here are ${entries.length} logged career wins to work from:\n\n${serializeEntries(
+    entries,
+  )}`;
+}
+
+function parseResult(format: AiFormat, raw: string): AiResult {
+  if (!raw) throw new Error("The model returned an empty response.");
+  const parsed = JSON.parse(raw) as { items?: string[]; markdown?: string };
+  return { format, items: parsed.items, markdown: parsed.markdown };
+}
+
+/**
+ * Generate polished synthesis text from a user's wins.
+ * Routes to whichever provider is configured. Throws on config / API errors —
+ * callers handle them.
+ */
+export async function generateAiSynthesis(
+  entries: Entry[],
+  format: AiFormat,
+): Promise<AiResult> {
+  const provider = activeProvider();
+  if (provider === "gemini") return generateWithGemini(entries, format);
+  if (provider === "claude") return generateWithClaude(entries, format);
+  throw new Error("No AI provider is configured on this server.");
+}
+
+// --- Claude (Anthropic) -----------------------------------------------------
+
+function claudeSchema(format: AiFormat) {
   if (format === "review") {
     return {
       type: "object",
@@ -73,38 +113,64 @@ function schemaFor(format: AiFormat) {
   } as const;
 }
 
-/**
- * Generate polished synthesis text from a user's wins using Claude.
- * Uses structured outputs so the response is always valid JSON in our shape.
- * Throws on configuration, API, or refusal errors — callers handle them.
- */
-export async function generateAiSynthesis(
+async function generateWithClaude(
   entries: Entry[],
   format: AiFormat,
 ): Promise<AiResult> {
-  // Reads ANTHROPIC_API_KEY from the environment.
-  const client = new Anthropic();
-
-  const userContent = `Here are ${entries.length} logged career wins to work from:\n\n${serializeEntries(
-    entries,
-  )}`;
+  const { default: Anthropic } = await import("@anthropic-ai/sdk");
+  const client = new Anthropic(); // reads ANTHROPIC_API_KEY
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: CLAUDE_MODEL,
     max_tokens: 4000,
     system: SYSTEM_PROMPTS[format],
-    output_config: { format: { type: "json_schema", schema: schemaFor(format) } },
-    messages: [{ role: "user", content: userContent }],
+    output_config: {
+      format: { type: "json_schema", schema: claudeSchema(format) },
+    },
+    messages: [{ role: "user", content: buildUserContent(entries) }],
   });
 
   if (response.stop_reason === "refusal") {
     throw new Error("The model declined to generate this content.");
   }
-
   const textBlock = response.content.find((b) => b.type === "text");
   const raw = textBlock && textBlock.type === "text" ? textBlock.text : "";
-  if (!raw) throw new Error("The model returned an empty response.");
+  return parseResult(format, raw);
+}
 
-  const parsed = JSON.parse(raw) as { items?: string[]; markdown?: string };
-  return { format, items: parsed.items, markdown: parsed.markdown };
+// --- Gemini (Google AI Studio) ----------------------------------------------
+
+async function generateWithGemini(
+  entries: Entry[],
+  format: AiFormat,
+): Promise<AiResult> {
+  const { GoogleGenAI, Type } = await import("@google/genai");
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+  const responseSchema =
+    format === "review"
+      ? {
+          type: Type.OBJECT,
+          properties: { markdown: { type: Type.STRING } },
+          required: ["markdown"],
+        }
+      : {
+          type: Type.OBJECT,
+          properties: {
+            items: { type: Type.ARRAY, items: { type: Type.STRING } },
+          },
+          required: ["items"],
+        };
+
+  const response = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: buildUserContent(entries),
+    config: {
+      systemInstruction: SYSTEM_PROMPTS[format],
+      responseMimeType: "application/json",
+      responseSchema,
+    },
+  });
+
+  return parseResult(format, response.text ?? "");
 }
