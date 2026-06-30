@@ -39,12 +39,16 @@ export default async function AppLayout({
           <SidebarNav />
         </div>
         <div className="flex items-center justify-between border-t border-border pt-4">
-          <div className="min-w-0 px-2">
+          <Link
+            href="/profile"
+            className="min-w-0 flex-1 rounded-md px-2 py-1 transition-colors hover:bg-surface-muted"
+            title="View your profile"
+          >
             <p className="truncate text-sm font-medium">{displayName}</p>
             <p className="truncate text-xs text-muted-foreground">
               {user.email}
             </p>
-          </div>
+          </Link>
           <div className="flex items-center">
             <ThemeToggle />
             <SignOutButton />

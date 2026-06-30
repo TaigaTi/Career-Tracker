@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, PenLine, Mic, CalendarDays, Wand2 } from "lucide-react";
+import {
+  LayoutDashboard,
+  PenLine,
+  Mic,
+  CalendarDays,
+  Wand2,
+  UserRound,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -11,6 +18,13 @@ const NAV = [
   { href: "/ramble", label: "Ramble", icon: Mic },
   { href: "/timeline", label: "Timeline", icon: CalendarDays },
   { href: "/synthesis", label: "Synthesis", icon: Wand2 },
+] as const;
+
+// The mobile tab bar also surfaces Profile; on desktop it lives in the
+// sidebar footer (the user's name links to it).
+const BOTTOM_NAV = [
+  ...NAV,
+  { href: "/profile", label: "Profile", icon: UserRound },
 ] as const;
 
 function useIsActive() {
@@ -47,8 +61,8 @@ export function BottomNav() {
   const isActive = useIsActive();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur md:hidden pb-[env(safe-area-inset-bottom)]">
-      <div className="grid grid-cols-5">
-        {NAV.map(({ href, label, icon: Icon }) => (
+      <div className="grid grid-cols-6">
+        {BOTTOM_NAV.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}
