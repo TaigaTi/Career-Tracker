@@ -47,8 +47,26 @@ export const IMPACT_WEIGHT: Record<Impact, number> = {
 export interface Profile {
   id: string;
   full_name: string | null;
+  /** Short professional tagline, e.g. "Senior Frontend Engineer". */
   headline: string | null;
+  /** Current job title / role. */
+  role: string | null;
+  company: string | null;
+  location: string | null;
+  /** Free-form "about me" paragraph. */
+  bio: string | null;
   created_at: string;
+  updated_at: string;
+}
+
+/** Shape used when updating a profile from a form. */
+export interface ProfileInput {
+  full_name: string | null;
+  headline: string | null;
+  role: string | null;
+  company: string | null;
+  location: string | null;
+  bio: string | null;
 }
 
 export interface Entry {
