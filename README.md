@@ -3,26 +3,26 @@
 **Never forget a win. Get the promotion.**
 
 JobWize is a career-accomplishment journal that turns the wins you log day-to-day
-into the material you actually need at review time — promotion cases, performance
+into the material you actually need at review time, promotion cases, performance
 self-reviews, and resume bullets. Capture an accomplishment in seconds, build a
 searchable timeline of your impact, and synthesize it into polished, copy-ready
 narratives.
 
 ## Features (MVP)
 
-- **Authentication** — email + password sign-up and sign-in, plus Google OAuth.
-- **Quick logging** — capture a win the moment it happens: title, impact, and tags, with zero blank-page friction.
-- **Timeline with filters** — browse and search every win, filterable by impact, theme, and date.
-- **Template-based synthesis** — group wins into promotion bullets, review highlights, and resume lines, ready to copy.
-- **Installable PWA** — install JobWize to your home screen or desktop and view your timeline offline.
-- **Dark mode** — automatic or manual, with the theme set before first paint to avoid flashes.
+- **Authentication**: email + password sign-up and sign-in, plus Google OAuth.
+- **Quick logging**: capture a win the moment it happens: title, impact, and tags, with zero blank-page friction.
+- **Timeline with filters**: browse and search every win, filterable by impact, theme, and date.
+- **Template-based synthesis**: group wins into promotion bullets, review highlights, and resume lines, ready to copy.
+- **Installable PWA**: install JobWize to your home screen or desktop and view your timeline offline.
+- **Dark mode**: automatic or manual, with the theme set before first paint to avoid flashes.
 
 ## Tech stack
 
 - [Next.js 16](https://nextjs.org/) (App Router) with TypeScript
 - [React 19](https://react.dev/)
 - [Tailwind CSS v4](https://tailwindcss.com/)
-- [Supabase](https://supabase.com/) — Postgres, Auth, and Row Level Security
+- [Supabase](https://supabase.com/), Postgres, Auth, and Row Level Security
 - Deployed on [Vercel](https://vercel.com/)
 
 ## Setup
@@ -36,7 +36,7 @@ narratives.
 2. **Create a Supabase project**
 
    Sign in at [supabase.com](https://supabase.com/) and create a new project. Note
-   the project URL and API keys — you'll need them in step 4.
+   the project URL and API keys, you'll need them in step 4.
 
 3. **Run the database migration**
 
@@ -60,7 +60,7 @@ narratives.
    | --- | --- |
    | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API → Project URL |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API → Project API keys (anon / public) |
-   | `NEXT_PUBLIC_SITE_URL` | Your app's base URL — use `http://localhost:3000` for local dev |
+   | `NEXT_PUBLIC_SITE_URL` | Your app's base URL, use `http://localhost:3000` for local dev |
 
 5. **Configure authentication providers**
 
@@ -90,7 +90,7 @@ narratives.
    allowed redirect URLs.
 5. Deploy.
 
-## PWA — installing JobWize
+## PWA, installing JobWize
 
 JobWize is an installable progressive web app with offline support for previously
 visited pages.
@@ -106,7 +106,7 @@ reconnect.
 
 ## Roadmap
 
-- **Integrations** to pull in accomplishments automatically — Asana, GitHub,
+- **Integrations** to pull in accomplishments automatically, Asana, GitHub,
   Trello, Clockify, and Todoist.
 - **AI-powered synthesis** to draft promotion cases, reviews, and resume bullets
   from your logged wins.

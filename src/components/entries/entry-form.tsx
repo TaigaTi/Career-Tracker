@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { PenLine, Save, AlertCircle } from "lucide-react";
+import { PenLine, Save, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import {
   CATEGORIES,
   IMPACTS,
@@ -11,6 +11,7 @@ import {
   type Entry,
 } from "@/lib/types";
 import { createEntry, updateEntry } from "@/lib/entries-actions";
+import { autofillEntry } from "@/lib/ai-autofill-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,14 +21,18 @@ import { Select } from "@/components/ui/select";
 interface EntryFormProps {
   mode: "create" | "edit";
   entry?: Entry;
+  /** Whether AI autofill is available (a provider key is configured). */
+  aiEnabled?: boolean;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function EntryForm({ mode, entry }: EntryFormProps) {
+export function EntryForm({ mode, entry, aiEnabled = false }: EntryFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
+  const [aiBusy, setAiBusy] = React.useState(false);
+  const [aiNote, setAiNote] = React.useState<string | null>(null);
 
   const [title, setTitle] = React.useState(entry?.title ?? "");
   const [description, setDescription] = React.useState(
@@ -44,6 +49,32 @@ export function EntryForm({ mode, entry }: EntryFormProps) {
   const [occurredOn, setOccurredOn] = React.useState(
     entry?.occurred_on ?? today(),
   );
+
+  async function onAutofill() {
+    setError(null);
+    setAiNote(null);
+    if (!title.trim()) {
+      setError("Add what you accomplished first, then autofill.");
+      return;
+    }
+    setAiBusy(true);
+    try {
+      const res = await autofillEntry(title, description);
+      if (!res.ok || !res.suggestion) {
+        setError(res.error ?? "Could not generate suggestions.");
+        return;
+      }
+      const s = res.suggestion;
+      setCategory(s.category);
+      setImpact(s.impact);
+      if (s.tags.length) setTags(s.tags.join(", "));
+      // Only fill metrics when the model found something; never wipe the user's.
+      if (s.metrics) setMetrics(s.metrics);
+      setAiNote("Filled in category, impact, and tags from your story.");
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -116,6 +147,33 @@ export function EntryForm({ mode, entry }: EntryFormProps) {
           rows={4}
         />
       </div>
+
+      {aiEnabled && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-border bg-surface-muted/50 px-3 py-2.5">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onAutofill}
+            disabled={aiBusy || isPending || !title.trim()}
+          >
+            {aiBusy ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Analyzing…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Autofill details
+              </>
+            )}
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            {aiNote ?? "Let AI suggest the impact, category, and tags from your story."}
+          </span>
+        </div>
+      )}
 
       <div>
         <Label htmlFor="metrics">Quantified impact (optional)</Label>

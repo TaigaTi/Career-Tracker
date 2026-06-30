@@ -17,7 +17,7 @@ export interface AiSynthesisResult {
 /**
  * Server action: generate Claude-polished synthesis for the current user's
  * wins (filtered the same way the page is). Re-fetches entries server-side so
- * RLS enforces ownership — the client only sends the format and filters.
+ * RLS enforces ownership, the client only sends the format and filters.
  */
 export async function enhanceWithAi(
   format: AiFormat,

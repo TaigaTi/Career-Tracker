@@ -13,7 +13,7 @@ export function EmptyState() {
         <div>
           <h2 className="text-lg font-semibold">No wins logged yet</h2>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            Your first entry is the hardest — and the most satisfying.
+            Your first entry is the hardest, and the most satisfying.
             Future-you, writing a promotion case, will thank you.
           </p>
         </div>

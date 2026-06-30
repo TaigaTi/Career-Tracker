@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { EntryForm } from "@/components/entries/entry-form";
+import { isAiConfigured } from "@/lib/ai-synthesis";
 
 export const metadata = { title: "Log a win" };
 
@@ -15,7 +16,7 @@ export default function LogPage() {
 
       <Card>
         <CardContent className="p-5 sm:p-6">
-          <EntryForm mode="create" />
+          <EntryForm mode="create" aiEnabled={isAiConfigured()} />
         </CardContent>
       </Card>
     </div>
