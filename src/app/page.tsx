@@ -10,7 +10,7 @@ const FEATURES = [
   {
     icon: PenLine,
     title: "Log wins in seconds",
-    body: "Capture an accomplishment the moment it happens — title, impact, a tag. No friction, no blank-page dread.",
+    body: "Capture an accomplishment the moment it happens, title, impact, a tag. No friction, no blank-page dread.",
   },
   {
     icon: CalendarDays,
@@ -20,7 +20,7 @@ const FEATURES = [
   {
     icon: Wand2,
     title: "Turn logs into your case",
-    body: "Group your wins into promotion bullets, review highlights, and resume lines — ready to copy.",
+    body: "Group your wins into promotion bullets, review highlights, and resume lines, ready to copy.",
   },
 ];
 
@@ -66,7 +66,7 @@ export default async function LandingPage() {
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg">
                 <Link href="/signup">
-                  Start logging — it&apos;s free
+                  Start logging, it&apos;s free
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -96,7 +96,7 @@ export default async function LandingPage() {
       </main>
 
       <footer className="border-t border-border px-5 py-6 text-center text-sm text-muted-foreground">
-        <p>JobWize — track your career, one win at a time.</p>
+        <p>JobWize, track your career, one win at a time.</p>
       </footer>
     </div>
   );

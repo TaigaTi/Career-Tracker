@@ -20,7 +20,7 @@ export function EmptyState({ inRange = false }: { inRange?: boolean }) {
           </h2>
           <p className="text-sm text-muted-foreground">
             {inRange
-              ? "No wins fall in this range. Try widening the dates, or log a few more wins — this page turns them into promotion bullets, resume lines, and review summaries."
+              ? "No wins fall in this range. Try widening the dates, or log a few more wins, this page turns them into promotion bullets, resume lines, and review summaries."
               : "Once you've logged a few wins, this page turns them into copy-ready promotion bullets, resume lines, and review summaries. The hard part is just starting."}
           </p>
         </div>

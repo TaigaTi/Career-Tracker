@@ -1,7 +1,7 @@
 import "server-only";
 import { CATEGORY_LABELS, IMPACT_LABELS, type Entry } from "@/lib/types";
 
-// Provider models — override via env. Defaults are the latest fast tiers.
+// Provider models, override via env. Defaults are the latest fast tiers.
 const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-4-8";
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
@@ -31,23 +31,30 @@ export function isAiConfigured(): boolean {
   return activeProvider() !== null;
 }
 
+// Appended to every prompt: keep the output free of em dashes (a user preference).
+const STYLE_RULE =
+  'Write in plain prose. Never use em dashes or en dashes; use commas, periods, parentheses, or the word "to" for ranges instead.';
+
 const SYSTEM_PROMPTS: Record<AiFormat, string> = {
   promotion: `You help professionals make the case for a promotion.
 Given a list of their logged career wins, write impact-first promotion bullets a manager could drop into a promotion packet.
 - Lead with the outcome and scope, then the action. Weave in any metrics verbatim.
 - Group related wins into a single strong bullet when it makes the case stronger; don't pad.
-- Use confident, specific, professional language. No clichés, no invented facts — only use what the wins state.
-- Each bullet is one or two sentences. Return 4–8 of the strongest bullets.`,
+- Use confident, specific, professional language. No clichés, no invented facts; only use what the wins state.
+- Each bullet is one or two sentences. Return 4 to 8 of the strongest bullets.
+- ${STYLE_RULE}`,
   resume: `You help professionals turn raw accomplishments into resume bullet points.
 Given a list of their logged career wins, write tight, action-verb-led resume lines.
 - Start each line with a strong past-tense action verb; vary the openings.
 - Quantify with any metrics provided; never invent numbers or facts.
-- Keep each line to a single concise line of impact. Return 4–8 lines, strongest first.`,
-  review: `You help professionals write a self-review / performance summary.
+- Keep each line to a single concise line of impact. Return 4 to 8 lines, strongest first.
+- ${STYLE_RULE}`,
+  review: `You help professionals write a self-review or performance summary.
 Given a list of their logged career wins, write a concise self-review in Markdown.
 - Open with a one or two sentence summary of the period's impact.
 - Then group accomplishments under a few "## " headings (by theme or category) with brief bullet points.
-- Be specific and grounded only in the wins provided; weave in metrics. No invented facts, no filler.`,
+- Be specific and grounded only in the wins provided; weave in metrics. No invented facts, no filler.
+- ${STYLE_RULE}`,
 };
 
 function serializeEntries(entries: Entry[]): string {
@@ -81,8 +88,8 @@ function parseResult(format: AiFormat, raw: string): AiResult {
 
 /**
  * Generate polished synthesis text from a user's wins.
- * Routes to whichever provider is configured. Throws on config / API errors —
- * callers handle them.
+ * Routes to whichever provider is configured. Throws on config / API errors,
+ * which callers handle.
  */
 export async function generateAiSynthesis(
   entries: Entry[],

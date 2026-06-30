@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: "JobWize",
   title: {
-    default: "JobWize — Track every career win",
+    default: "JobWize, Track every career win",
     template: "%s · JobWize",
   },
   description:

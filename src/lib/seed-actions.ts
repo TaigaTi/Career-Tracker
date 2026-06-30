@@ -132,7 +132,7 @@ export async function seedDemoEntries(): Promise<SeedResult> {
   if ((count ?? 0) > 0) {
     return {
       ok: false,
-      error: "You already have entries — demo data is only for empty accounts.",
+      error: "You already have entries, demo data is only for empty accounts.",
     };
   }
 

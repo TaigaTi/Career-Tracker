@@ -42,8 +42,7 @@ export function TimelineFilters({ tags }: TimelineFiltersProps) {
   const [search, setSearch] = React.useState(urlSearch);
 
   // Keep the search box in sync when the URL changes externally (Clear button,
-  // browser back/forward). Adjusting state during render — not in an effect —
-  // is React's recommended pattern for deriving from changed inputs.
+  // browser back/forward). Adjusting state during render, not in an effect, // is React's recommended pattern for deriving from changed inputs.
   const [prevUrlSearch, setPrevUrlSearch] = React.useState(urlSearch);
   if (urlSearch !== prevUrlSearch) {
     setPrevUrlSearch(urlSearch);

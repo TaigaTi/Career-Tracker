@@ -134,7 +134,7 @@ export function SynthesisView({
       });
       return;
     }
-    // custom — keep existing dates, just switch mode.
+    // custom, keep existing dates, just switch mode.
     navigate({ preset: "custom" });
   }
 
@@ -191,7 +191,7 @@ export function SynthesisView({
 
   const rangeLabel = React.useMemo(() => {
     if (filters.from && filters.to) {
-      return `${format(new Date(filters.from), "MMM d, yyyy")} – ${format(new Date(filters.to), "MMM d, yyyy")}`;
+      return `${format(new Date(filters.from), "MMM d, yyyy")} to ${format(new Date(filters.to), "MMM d, yyyy")}`;
     }
     if (filters.from) return `since ${format(new Date(filters.from), "MMM d, yyyy")}`;
     if (filters.to) return `through ${format(new Date(filters.to), "MMM d, yyyy")}`;

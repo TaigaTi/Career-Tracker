@@ -3,7 +3,7 @@
 // Takes the user's logged Entry[] and turns it into copy-ready material:
 // promotion bullets, resume lines, and a self-review summary.
 //
-// This module is intentionally PURE and DETERMINISTIC — no DB, no React,
+// This module is intentionally PURE and DETERMINISTIC, no DB, no React,
 // no LLM calls. That keeps it trivially unit-testable today and means the
 // template-based MVP can later be swapped for a Claude-powered version
 // behind the same function signatures.
@@ -174,7 +174,7 @@ export function groupBy(entries: Entry[], dimension: GroupDimension): Group[] {
 
 /** Strip trailing punctuation/whitespace so we can re-punctuate cleanly. */
 function trimTrailing(text: string): string {
-  return text.replace(/[\s.;,—-]+$/u, "").trim();
+  return text.replace(/[\s.;,-]+$/u, "").trim();
 }
 
 /** Lowercase the first character (for weaving a title mid-sentence). */
@@ -255,7 +255,7 @@ function hasMetrics(entry: Entry): boolean {
  * when present, and a tuned recognition clause reinforces the impact level.
  *
  * Example shape:
- *   "Led migration to a new CI pipeline, cutting deploy time 40% — recognized
+ *   "Led migration to a new CI pipeline, cutting deploy time 40%, recognized
  *    as a major win."
  */
 export function toPromotionBullets(entries: Entry[]): string[] {
@@ -272,7 +272,7 @@ export function toPromotionBullets(entries: Entry[]): string[] {
     }
 
     const recognition = IMPACT_RECOGNITION[entry.impact];
-    return `${parts[0]} — ${recognition}.`;
+    return `${parts[0]}, ${recognition}.`;
   });
 }
 

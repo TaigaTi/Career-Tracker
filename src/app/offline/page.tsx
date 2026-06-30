@@ -13,7 +13,7 @@ export default function OfflinePage() {
       </h1>
       <p className="mt-3 max-w-sm text-muted-foreground">
         We couldn&apos;t reach the network right now. JobWize works best with a
-        connection — but don&apos;t worry, any wins you log will sync
+        connection, but don&apos;t worry, any wins you log will sync
         automatically once you&apos;re back online.
       </p>
       <p className="mt-8 text-sm text-muted-foreground">

@@ -111,7 +111,7 @@ export default async function DashboardPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
               <p className="text-muted-foreground">
-                No wins logged yet. Your first entry is the hardest — and the
+                No wins logged yet. Your first entry is the hardest, and the
                 most satisfying.
               </p>
               <Button asChild>

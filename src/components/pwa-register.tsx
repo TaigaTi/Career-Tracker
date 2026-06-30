@@ -18,7 +18,7 @@ export function PwaRegister() {
 
     const onLoad = () => {
       navigator.serviceWorker.register("/sw.js").catch(() => {
-        // Registration failures are non-fatal — the app still works online.
+        // Registration failures are non-fatal, the app still works online.
       });
     };
 

@@ -1,7 +1,7 @@
-# Next Steps — Getting JobWize Running
+# Next Steps, Getting JobWize Running
 
 The app is built. This is the checklist of everything **you** still need to do to
-take it from source code to a working app — locally first, then deployed. Work
+take it from source code to a working app, locally first, then deployed. Work
 through it top to bottom; each section depends on the ones before it.
 
 > The [`README.md`](./README.md) has the condensed version. This file is the
@@ -13,9 +13,9 @@ through it top to bottom; each section depends on the ones before it.
 ## 0. Prerequisites
 
 - [ ] **Node.js 20+** installed (`node -v`)
-- [ ] A **Supabase** account — https://supabase.com (free tier is fine)
+- [ ] A **Supabase** account, https://supabase.com (free tier is fine)
 - [ ] A **GitHub** account (for deploying via Vercel)
-- [ ] A **Vercel** account — https://vercel.com (free tier is fine)
+- [ ] A **Vercel** account, https://vercel.com (free tier is fine)
 - [ ] *(Optional, for Google sign-in)* A **Google Cloud** account
 
 ```bash
@@ -31,7 +31,7 @@ npm install
        choose the region closest to your users.
 3. [ ] Wait ~2 minutes for it to provision.
 
-Keep this tab open — you'll grab keys from it in step 3.
+Keep this tab open, you'll grab keys from it in step 3.
 
 ---
 
@@ -40,14 +40,14 @@ Keep this tab open — you'll grab keys from it in step 3.
 This creates the `profiles` and `entries` tables, all the Row-Level-Security
 policies, and the trigger that auto-creates a profile on signup.
 
-**Option A — SQL Editor (easiest, no CLI):**
+**Option A, SQL Editor (easiest, no CLI):**
 
 1. [ ] In your Supabase project, open **SQL Editor → New query**.
 2. [ ] Copy the entire contents of [`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)
        and paste it in.
 3. [ ] Click **Run**. You should see "Success. No rows returned."
 
-**Option B — Supabase CLI:**
+**Option B, Supabase CLI:**
 
 ```bash
 npx supabase link --project-ref <your-project-ref>
@@ -78,7 +78,7 @@ tables, both showing a green **RLS enabled** badge.
 > ⚠️ Use the **`anon` / public** key, **not** the `service_role` key. The
 > `service_role` key bypasses RLS and must never ship to the browser.
 
-`.env.local` is gitignored — your keys stay out of source control.
+`.env.local` is gitignored, your keys stay out of source control.
 
 ---
 
@@ -88,7 +88,7 @@ In **Supabase → Authentication**:
 
 ### 4a. Email/password (required)
 
-1. [ ] **Sign In / Providers → Email** — make sure it's **enabled**.
+1. [ ] **Sign In / Providers → Email**: make sure it's **enabled**.
 2. [ ] For fast local testing, you can turn **Confirm email** *off* (Authentication
        → Sign In / Providers → Email) so new signups work without an inbox. Turn
        it back **on** before going to production.
@@ -101,7 +101,7 @@ In **Supabase → Authentication**:
        - `http://localhost:3000/auth/callback`
        - *(later)* your production URL, e.g. `https://jobwize.vercel.app/auth/callback`
 
-### 4c. Google OAuth (optional — only if you want the "Continue with Google" button)
+### 4c. Google OAuth (optional, only if you want the "Continue with Google" button)
 
 The sign-in UI already has a Google button. To make it work you need a Google
 OAuth client, then paste its credentials into Supabase.
@@ -109,12 +109,11 @@ OAuth client, then paste its credentials into Supabase.
 **In Google Cloud Console** (https://console.cloud.google.com):
 
 1. [ ] Create (or select) a project.
-2. [ ] **APIs & Services → OAuth consent screen** — configure it (External user
+2. [ ] **APIs & Services → OAuth consent screen**: configure it (External user
        type is fine for testing; add yourself as a test user).
 3. [ ] **APIs & Services → Credentials → Create Credentials → OAuth client ID**.
 4. [ ] Application type: **Web application**.
-5. [ ] Under **Authorized redirect URIs**, add the callback Supabase gives you —
-       it lives at:
+5. [ ] Under **Authorized redirect URIs**, add the callback Supabase gives you, it lives at:
 
        ```
        https://<your-project-ref>.supabase.co/auth/v1/callback
@@ -127,10 +126,10 @@ OAuth client, then paste its credentials into Supabase.
 
 **Back in Supabase:**
 
-7. [ ] **Authentication → Sign In / Providers → Google** — enable it and paste in
+7. [ ] **Authentication → Sign In / Providers → Google**: enable it and paste in
        the Client ID and Client secret. Save.
 
-> Skipping Google for now? Fine — email/password works on its own. Just don't
+> Skipping Google for now? Fine, email/password works on its own. Just don't
 > click the Google button until this is configured.
 
 ---
@@ -154,7 +153,7 @@ Open http://localhost:3000.
 - [ ] Sign out and sign back in.
 
 If signup hangs or errors, it's almost always (a) wrong env keys or (b) the
-redirect URL not added in step 4b — see Troubleshooting below.
+redirect URL not added in step 4b, see Troubleshooting below.
 
 ---
 
@@ -162,7 +161,7 @@ redirect URL not added in step 4b — see Troubleshooting below.
 
 1. [ ] Push this repo to GitHub (if it isn't already).
 2. [ ] In Vercel, **Add New → Project** and import the GitHub repo.
-3. [ ] Vercel auto-detects Next.js — no build config changes needed.
+3. [ ] Vercel auto-detects Next.js, no build config changes needed.
 4. [ ] Under **Settings → Environment Variables**, add the same three variables
        from `.env.local`, but set:
 
@@ -179,7 +178,7 @@ Once you have your Vercel URL:
 1. [ ] **Supabase → Authentication → URL Configuration**: add
        `https://<your-app>.vercel.app/auth/callback` to **Redirect URLs**, and
        consider updating **Site URL** to the production URL.
-2. [ ] *(If using Google)* add the same Vercel callback logic — Google's redirect
+2. [ ] *(If using Google)* add the same Vercel callback logic, Google's redirect
        URI stays as the Supabase `/auth/v1/callback`, so no change needed there,
        but make sure your OAuth consent screen is published if you want
        non-test-users to sign in.
@@ -206,9 +205,9 @@ Once you have your Vercel URL:
 | `Invalid API key` / blank dashboard | Wrong or missing `NEXT_PUBLIC_SUPABASE_*` values in `.env.local`. Double-check you used the **anon** key. Restart `npm run dev` after editing env. |
 | Redirected to `/auth/auth-code-error` after login | The callback URL isn't in Supabase's **Redirect URLs** (step 4b), or the OAuth `code` expired (just retry). |
 | Signup "succeeds" but no session | **Confirm email** is on but you didn't click the email link. Either confirm via email or disable it for testing (step 4a). |
-| Can't see other users' data — *good!* | That's RLS working. Every user sees only their own rows. |
+| Can't see other users' data, *good!* | That's RLS working. Every user sees only their own rows. |
 | Google button errors | Provider not enabled in Supabase, or the Supabase `/auth/v1/callback` URL isn't in Google's Authorized redirect URIs (step 4c). |
-| Env change ignored on Vercel | Env vars only apply to **new** builds — trigger a redeploy. |
+| Env change ignored on Vercel | Env vars only apply to **new** builds, trigger a redeploy. |
 
 ---
 
@@ -226,7 +225,7 @@ Once you have your Vercel URL:
 
 ## After the MVP (roadmap)
 
-These are intentionally **not** built yet — see `README.md` for the vision:
+These are intentionally **not** built yet, see `README.md` for the vision:
 
 - AI-powered synthesis (Claude) to draft promotion cases, reviews, and resume
   bullets from logged wins.
