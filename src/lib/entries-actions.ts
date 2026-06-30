@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORIES, IMPACTS, type EntryInput } from "@/lib/types";
+import { validateEntryInput } from "@/lib/entry-input";
+import { type EntryInput } from "@/lib/types";
 
 export interface ActionResult {
   ok: boolean;
@@ -10,51 +11,17 @@ export interface ActionResult {
   id?: string;
 }
 
-function parseTags(raw: FormData | string[] | string | null): string[] {
-  let value: string[];
-  if (typeof raw === "string") {
-    value = raw.split(",");
-  } else if (Array.isArray(raw)) {
-    value = raw;
-  } else {
-    value = [];
-  }
-  return [
-    ...new Set(
-      value
-        .map((t) => t.trim().toLowerCase().replace(/^#/, ""))
-        .filter(Boolean),
-    ),
-  ].slice(0, 12);
-}
-
 /** Validate + normalize raw form values into an EntryInput. */
 function readInput(form: FormData): EntryInput | { error: string } {
-  const title = (form.get("title") as string)?.trim();
-  if (!title) return { error: "A title is required." };
-  if (title.length > 200) return { error: "Title is too long (max 200)." };
-
-  const category = (form.get("category") as string) || "achievement";
-  if (!CATEGORIES.includes(category as never))
-    return { error: "Invalid category." };
-
-  const impact = (form.get("impact") as string) || "moderate";
-  if (!IMPACTS.includes(impact as never))
-    return { error: "Invalid impact level." };
-
-  const occurred_on =
-    (form.get("occurred_on") as string) ||
-    new Date().toISOString().slice(0, 10);
-
-  return {
-    title,
-    description: ((form.get("description") as string) || "").trim() || null,
-    metrics: ((form.get("metrics") as string) || "").trim() || null,
-    category: category as EntryInput["category"],
-    impact: impact as EntryInput["impact"],
-    tags: parseTags(form.get("tags") as string),
-    occurred_on,
-  };
+  return validateEntryInput({
+    title: form.get("title") as string | null,
+    description: form.get("description") as string | null,
+    metrics: form.get("metrics") as string | null,
+    category: form.get("category") as string | null,
+    impact: form.get("impact") as string | null,
+    tags: form.get("tags") as string | null,
+    occurred_on: form.get("occurred_on") as string | null,
+  });
 }
 
 export async function createEntry(form: FormData): Promise<ActionResult> {

@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, PenLine, CalendarDays, Wand2 } from "lucide-react";
+import { LayoutDashboard, PenLine, Mic, CalendarDays, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/log", label: "Log a win", icon: PenLine },
+  { href: "/ramble", label: "Ramble", icon: Mic },
   { href: "/timeline", label: "Timeline", icon: CalendarDays },
   { href: "/synthesis", label: "Synthesis", icon: Wand2 },
 ] as const;
@@ -46,7 +47,7 @@ export function BottomNav() {
   const isActive = useIsActive();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur md:hidden pb-[env(safe-area-inset-bottom)]">
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-5">
         {NAV.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
